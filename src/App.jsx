@@ -224,11 +224,12 @@ export default function App() {
       {/* Player */}
       {playerId && (
         <div id="player" className="mt-6">
-          <div className="w-full aspect-video bg-black rounded overflow-hidden">
+          {/* Responsive player wrapper: enforces 16:9 and prevents black bar */}
+          <div className="relative w-full pt-[56.25%] bg-black rounded overflow-hidden">
             <iframe
+              className="absolute top-0 left-0 w-full h-full border-0"
               title="YouTube player"
               src={`https://www.youtube.com/embed/${playerId}`}
-              className="w-full h-[360px] md:h-[480px]"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />

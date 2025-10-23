@@ -13,14 +13,17 @@ export default function VideoCard({ item, onSelect }) {
       className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 hover:border-sky-300 cursor-pointer"
       onClick={() => onSelect(playerId)}
     >
-      {/* Thumbnail Section */}
+      {/* Thumbnail / Video Section */}
       <div className="relative">
-        <img
-          src={item.thumbnail}
-          alt={item.title}
-          className="w-full h-44 object-cover"
-          loading="lazy"
-        />
+        {/* Responsive 16:9 Wrapper */}
+        <div className="relative w-full pt-[56.25%] overflow-hidden bg-black">
+          <img
+            src={item.thumbnail}
+            alt={item.title}
+            className="absolute top-0 left-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+        </div>
 
         {/* Featured Tag */}
         {item.featured && (
