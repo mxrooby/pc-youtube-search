@@ -33,7 +33,3 @@ npm run start:proxy
 VITE_API_PROXY=http://localhost:4000/api/search
 ```
   - Then run `npm run dev` in the project root.
-
-## Notes
-- Replace `src/staticVideos.js` with your real static dataset.
-- The proxy simply forwards Google requests and appends the API key server-side so your key isn't exposed in the browser.
