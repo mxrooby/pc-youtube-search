@@ -133,3 +133,18 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* Adjust capsule height and spacing for better proportions */
+.bg-white.flex.items-center.rounded-full {
+  min-height: 50px; /* makes bar taller */
+}
+
+@media (max-width: 480px) {
+  .bg-white.flex.items-center.rounded-full {
+    padding-left: 10px;
+    padding-right: 8px;
+    min-height: 46px;
+  }
+  .bg-white.flex.items-center.rounded-full button {
+    padding: 0.4rem 0.9rem;
+  }
+}
