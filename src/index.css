@@ -2,7 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Gradient rounded search border */
+/* -------------------------
+   Core utility and looks
+   -------------------------*/
+
+/* Gradient rounded search border (kept) */
 .search-gradient {
   background: linear-gradient(90deg, #ff3b3b, #7c2ae8);
   padding: 3px;
@@ -12,47 +16,108 @@
   border-radius: 9999px;
   background-color: white;
 }
+
+/* clamp for titles */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* subtle card outline */
 .card-outline {
   border: 1px solid rgba(249, 205, 173, 0.65);
 }
 
-/* Gradient animation */
+/* -------------------------
+   Gradient animation
+   -------------------------*/
+
 @keyframes gradientFlow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .animate-gradient {
+  /* slightly richer gradient for nicer look */
+  background: linear-gradient(90deg, #38bdf8, #3b82f6, #4f46e5, #06b6d4);
   background-size: 300% 300%;
   animation: gradientFlow 6s ease infinite;
 }
 
-/* Responsive video / iframe wrapper
-   Use by wrapping your <iframe> inside a .video-embed div:
-   <div class="video-embed"> <iframe ...></iframe> </div>
-   Or use the Tailwind utility wrapper: relative w-full pt-[56.25%] ...
-*/
+/* -------------------------
+   Responsive search capsule tweaks
+   -------------------------*/
+
+/* Ensure the input and inner elements don't overflow their flex container */
+#search-input,
+.search-inner input,
+.search-inner {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+
+/* touch-friendly sizes on mobile */
+@media (max-width: 640px) {
+  .search-inner {
+    padding-left: 10px;
+    padding-right: 8px;
+  }
+  .search-inner input {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    height: 44px; /* taller for tap target */
+  }
+  button[type="submit"] {
+    padding-left: 10px;
+    padding-right: 10px;
+    min-width: 44px;
+  }
+}
+
+/* tiny screen: <= 320px icon-only button behavior */
+@media (max-width: 320px) {
+  /* hide textual label */
+  .btn-text { display: none !important; }
+
+  /* shrink button padding so the whole capsule fits */
+  button[type="submit"] {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    min-width: 38px;
+    border-radius: 9999px;
+  }
+
+  /* reduce left icon size slightly and input padding */
+  .bg-white svg.w-5.h-5 { width: 20px; height: 20px; }
+  #search-input { padding-left: 8px; padding-right: 6px; }
+
+  /* tighten the capsule ring */
+  .animate-gradient { padding: 2px; }
+  .bg-white { gap: 6px; }
+}
+
+/* keep text visible for screens wider than 320px */
+@media (min-width: 321px) {
+  .btn-text { display: inline; }
+}
+
+/* -------------------------
+   Video embed (kept)
+   -------------------------*/
+
+/* Responsive video wrapper */
 .video-embed {
   position: relative;
   width: 100%;
-  /* 16:9 aspect ratio */
+  /* 16:9 */
   padding-top: 56.25%;
   overflow: hidden;
   background: #000; /* hides white flash while loading */
-  border-radius: 8px; /* optional: matches cards */
+  border-radius: 8px;
 }
 
 .video-embed iframe,
