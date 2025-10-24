@@ -1,70 +1,119 @@
-// server.js - simple YouTube proxy (drop-in)
+// server.js — YouTube Proxy with multi-key failover & caching
+
 import express from "express";
+import cors from "cors";
+import fetch from "node-fetch";
 import dotenv from "dotenv";
+import NodeCache from "node-cache";
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 4000;
-const API_KEY = process.env.YOUTUBE_API_KEY;
+const PORT = process.env.PORT || 10000;
 
-if (!API_KEY) {
-  console.error("Missing YOUTUBE_API_KEY in .env");
+// Allow requests from your frontend
+app.use(cors({ origin: "*" }));
+
+// ------------- CONFIG -------------
+const keys = (process.env.YOUTUBE_API_KEYS || "")
+  .split(",")
+  .map(k => k.trim())
+  .filter(Boolean);
+
+if (keys.length === 0) {
+  console.error("❌ No YouTube API keys found. Set YOUTUBE_API_KEYS in Render Environment.");
   process.exit(1);
 }
 
-app.use((req, res, next) => {
-  // basic CORS for local dev
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-  next();
-});
+console.log(`🔑 Loaded ${keys.length} YouTube API key(s).`);
 
+// Simple round-robin index
+let currentIndex = 0;
+
+// Small in-memory cache (60s)
+const cache = new NodeCache({ stdTTL: 60 });
+
+// ----------------------------------
+
+// Helper to get next key in rotation
+function getNextKey() {
+  const key = keys[currentIndex];
+  currentIndex = (currentIndex + 1) % keys.length;
+  return key;
+}
+
+// Core proxy route
 app.get("/api/search", async (req, res) => {
-  try {
-    const q = req.query.q || "";
-    const pageToken = req.query.pageToken || "";
-    const maxResults = Math.min(parseInt(req.query.maxResults || "5", 10), 50);
+  const q = req.query.q || "";
+  const maxResults = req.query.maxResults || 5;
+  const pageToken = req.query.pageToken || "";
+  const cacheKey = `${q}:${pageToken}:${maxResults}`;
 
-    // basic validation
-    if (!q) {
-      return res.status(400).json({ error: "Missing ?q= parameter" });
-    }
+  // Serve cached results
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    return res.json(cached);
+  }
 
-    const params = new URLSearchParams({
-      key: API_KEY,
+  let lastError = null;
+
+  // Try each key until success
+  for (let i = 0; i < keys.length; i++) {
+    const key = getNextKey();
+    const url = new URL("https://www.googleapis.com/youtube/v3/search");
+    url.search = new URLSearchParams({
       part: "snippet",
-      q,
       type: "video",
-      maxResults: String(maxResults),
+      maxResults,
+      q,
       videoEmbeddable: "true",
       safeSearch: "none",
+      key,
     });
-    if (pageToken) params.set("pageToken", pageToken);
 
-    const url = `https://www.googleapis.com/youtube/v3/search?${params.toString()}`;
+    console.log(`[proxy] Using key[${i}] ending with ${key.slice(-6)} → ${q}`);
 
-    console.log("[proxy] GET", url);
-    const resp = await fetch(url);
-    const data = await resp.json();
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
 
-    // If YouTube error return it up (status 200 but with error body)
-    if (!resp.ok) {
-      console.error("[proxy] YouTube responded:", resp.status, data);
-      return res.status(resp.status).json(data);
+      if (data.error) {
+        const reason = data.error.errors?.[0]?.reason;
+        console.warn(`[proxy] YouTube error reason=${reason}`);
+
+        if (reason === "quotaExceeded") {
+          lastError = reason;
+          continue; // try next key
+        } else if (reason === "keyInvalid" || reason === "API_KEY_INVALID") {
+          lastError = reason;
+          continue; // try next key
+        } else {
+          return res.status(400).json({ error: data.error });
+        }
+      }
+
+      // Success
+      cache.set(cacheKey, data);
+      return res.json(data);
+    } catch (err) {
+      console.error("[proxy] fetch error:", err.message);
+      lastError = err.message;
     }
-
-    // Return the raw YouTube search result (we flatten on the client)
-    return res.json(data);
-  } catch (err) {
-    console.error("[proxy] error:", err);
-    return res.status(500).json({ error: "Proxy request failed", details: String(err) });
   }
+
+  // If we reach here, all keys failed
+  if (lastError === "quotaExceeded") {
+    return res
+      .status(429)
+      .json({ error: "quotaExceeded", message: "All YouTube API keys exceeded quota." });
+  }
+
+  return res
+    .status(500)
+    .json({ error: "All keys failed", message: lastError || "Unknown error" });
 });
+
+// ----------------------------------
 
 app.listen(PORT, () => {
   console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
