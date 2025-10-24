@@ -174,39 +174,47 @@
 @media (max-width: 420px) {
   .animate-gradient { padding: 2px; }
 }
-/* ======== MOBILE SAFE VIEW + SCROLL FIX ======== */
+/* ======== MOBILE SAFE VIEW (safe, non-invasive) ======== */
 
-/* Make the root layout fill the screen height */
+/* allow normal page scrolling (so CategoryTabs and static videos are reachable) */
 html, body, #root {
   height: 100%;
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* prevent body from scrolling */
+  overflow: auto; /* allow page to scroll normally */
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Force your main app wrapper to behave like a full-screen app */
+/* Do NOT force the immediate child of #root to be flex — keep existing React layout intact.
+   If your app already uses a flex layout, this won't override it. */
 #root > div {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  display: block;
+  min-height: 100%;
 }
 
-/* The scrollable section (usually where videos appear) */
+/* If there's a main element in your tree, make it a scrollable area if desired.
+   This is optional but helpful if later you switch to a full-height flex layout. */
 main {
-  flex: 1;
+  flex: 1 1 auto;
+  /* allow inner scrolling if structure supports it */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: env(safe-area-inset-bottom, 12px);
 }
 
-/* Safe padding at bottom so Unity navigation doesn’t overlap content */
+/* safe bottom padding so native nav in WebView doesn't overlap content */
 body {
   padding-bottom: env(safe-area-inset-bottom, 12px);
 }
 
-/* Optional: if you have a footer, ensure it stays visible */
+/* footer safety — if you have a footer keep it visible */
 footer {
   flex-shrink: 0;
   padding-bottom: env(safe-area-inset-bottom, 12px);
+}
+
+/* small tweak for tiny screens so the gradient ring isn't too thick */
+@media (max-width: 420px) {
+  .animate-gradient { padding: 2px; }
 }
