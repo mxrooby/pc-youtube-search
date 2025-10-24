@@ -40,8 +40,8 @@
   100% { background-position: 0% 50%; }
 }
 
+/* Keep your original gradient colors, just animate */
 .animate-gradient {
-  /* slightly richer gradient for nicer look */
   background: linear-gradient(90deg, #38bdf8, #3b82f6, #4f46e5, #06b6d4);
   background-size: 300% 300%;
   animation: gradientFlow 6s ease infinite;
@@ -54,53 +54,89 @@
 /* Ensure the input and inner elements don't overflow their flex container */
 #search-input,
 .search-inner input,
-.search-inner {
+.search-inner,
+.bg-white input {
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
 }
 
+/* Target the inner white capsule reliably and give good default height/spacing */
+/* This selector matches the structure used in your JSX: <div class="bg-white flex items-center rounded-full ..."> */
+.bg-white.flex.items-center.rounded-full {
+  min-height: 52px;               /* slightly taller capsule for breathing room */
+  gap: 12px;                      /* space between icon, input, and button */
+  padding-left: 12px;             /* inner padding so left icon not too close to edge */
+  padding-right: 10px;            /* inner padding so button not glued to edge */
+}
+
+/* Ensure the input text vertically centers nicely */
+.bg-white.flex.items-center.rounded-full input {
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  line-height: 1.2;
+}
+
+/* Style the icon-only button inside the capsule specifically so other buttons aren't affected */
+.bg-white.flex.items-center.rounded-full button[type="submit"] {
+  padding: 0.45rem;               /* compact circular button */
+  border-radius: 9999px;
+  min-width: 40px;                /* keeps tappable target */
+  height: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Give the icon some breathing room (white-on-blue) */
+.bg-white.flex.items-center.rounded-full button[type="submit"] svg {
+  display: block;
+}
+
+/* small shadow / hover (subtle) */
+.bg-white.flex.items-center.rounded-full button[type="submit"]:hover {
+  box-shadow: 0 6px 18px rgba(14, 165, 233, 0.12);
+}
+
 /* touch-friendly sizes on mobile */
 @media (max-width: 640px) {
-  .search-inner {
+  .bg-white.flex.items-center.rounded-full {
+    min-height: 48px;
     padding-left: 10px;
     padding-right: 8px;
+    gap: 10px;
   }
-  .search-inner input {
+  .bg-white.flex.items-center.rounded-full input {
     padding-top: 10px;
     padding-bottom: 10px;
-    height: 44px; /* taller for tap target */
   }
-  button[type="submit"] {
-    padding-left: 10px;
-    padding-right: 10px;
-    min-width: 44px;
+  .bg-white.flex.items-center.rounded-full button[type="submit"] {
+    padding: 0.45rem;
+    min-width: 36px;
   }
 }
 
-/* tiny screen: <= 320px icon-only button behavior */
+/* tiny screen: <= 320px ensure icon-only mode fits and capsule tightens a bit */
 @media (max-width: 320px) {
-  /* hide textual label */
-  .btn-text { display: none !important; }
-
-  /* shrink button padding so the whole capsule fits */
-  button[type="submit"] {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-    min-width: 38px;
-    border-radius: 9999px;
+  .bg-white.flex.items-center.rounded-full {
+    min-height: 44px;
+    padding-left: 8px;
+    padding-right: 6px;
+    gap: 8px;
   }
-
-  /* reduce left icon size slightly and input padding */
-  .bg-white svg.w-5.h-5 { width: 20px; height: 20px; }
-  #search-input { padding-left: 8px; padding-right: 6px; }
-
-  /* tighten the capsule ring */
-  .animate-gradient { padding: 2px; }
-  .bg-white { gap: 6px; }
+  .bg-white.flex.items-center.rounded-full input {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  .bg-white.flex.items-center.rounded-full button[type="submit"] {
+    padding: 0.35rem;
+    min-width: 34px;
+  }
+  /* if you still have a .btn-text span anywhere, ensure hidden on tiny screens */
+  .btn-text { display: none !important; }
 }
 
-/* keep text visible for screens wider than 320px */
+/* keep text visible for screens wider than 320px (if used elsewhere) */
 @media (min-width: 321px) {
   .btn-text { display: inline; }
 }
@@ -133,18 +169,8 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-/* Adjust capsule height and spacing for better proportions */
-.bg-white.flex.items-center.rounded-full {
-  min-height: 50px; /* makes bar taller */
-}
 
-@media (max-width: 480px) {
-  .bg-white.flex.items-center.rounded-full {
-    padding-left: 10px;
-    padding-right: 8px;
-    min-height: 46px;
-  }
-  .bg-white.flex.items-center.rounded-full button {
-    padding: 0.4rem 0.9rem;
-  }
+/* Optional: tiny polish to keep gradient ring from looking too thick on small screens */
+@media (max-width: 420px) {
+  .animate-gradient { padding: 2px; }
 }
