@@ -62,12 +62,11 @@
 }
 
 /* Target the inner white capsule reliably and give good default height/spacing */
-/* This selector matches the structure used in your JSX: <div class="bg-white flex items-center rounded-full ..."> */
 .bg-white.flex.items-center.rounded-full {
-  min-height: 52px;               /* slightly taller capsule for breathing room */
-  gap: 12px;                      /* space between icon, input, and button */
-  padding-left: 12px;             /* inner padding so left icon not too close to edge */
-  padding-right: 10px;            /* inner padding so button not glued to edge */
+  min-height: 52px;
+  gap: 12px;
+  padding-left: 12px;
+  padding-right: 10px;
 }
 
 /* Ensure the input text vertically centers nicely */
@@ -77,18 +76,18 @@
   line-height: 1.2;
 }
 
-/* Style the icon-only button inside the capsule specifically so other buttons aren't affected */
+/* Style the icon-only button inside the capsule */
 .bg-white.flex.items-center.rounded-full button[type="submit"] {
-  padding: 0.45rem;               /* compact circular button */
+  padding: 0.45rem;
   border-radius: 9999px;
-  min-width: 40px;                /* keeps tappable target */
+  min-width: 40px;
   height: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Give the icon some breathing room (white-on-blue) */
+/* Give the icon some breathing room */
 .bg-white.flex.items-center.rounded-full button[type="submit"] svg {
   display: block;
 }
@@ -116,7 +115,7 @@
   }
 }
 
-/* tiny screen: <= 320px ensure icon-only mode fits and capsule tightens a bit */
+/* tiny screen: <= 320px */
 @media (max-width: 320px) {
   .bg-white.flex.items-center.rounded-full {
     min-height: 44px;
@@ -132,11 +131,10 @@
     padding: 0.35rem;
     min-width: 34px;
   }
-  /* if you still have a .btn-text span anywhere, ensure hidden on tiny screens */
   .btn-text { display: none !important; }
 }
 
-/* keep text visible for screens wider than 320px (if used elsewhere) */
+/* keep text visible for screens wider than 320px */
 @media (min-width: 321px) {
   .btn-text { display: inline; }
 }
@@ -145,14 +143,12 @@
    Video embed (kept)
    -------------------------*/
 
-/* Responsive video wrapper */
 .video-embed {
   position: relative;
   width: 100%;
-  /* 16:9 */
   padding-top: 56.25%;
   overflow: hidden;
-  background: #000; /* hides white flash while loading */
+  background: #000;
   border-radius: 8px;
 }
 
@@ -170,51 +166,87 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Optional: tiny polish to keep gradient ring from looking too thick on small screens */
+/* Optional tweak for small screens */
 @media (max-width: 420px) {
   .animate-gradient { padding: 2px; }
 }
+
 /* ======== MOBILE SAFE VIEW (safe, non-invasive) ======== */
 
-/* allow normal page scrolling (so CategoryTabs and static videos are reachable) */
 html, body, #root {
   height: 100%;
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  overflow: auto; /* allow page to scroll normally */
+  overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-/* Do NOT force the immediate child of #root to be flex — keep existing React layout intact.
-   If your app already uses a flex layout, this won't override it. */
 #root > div {
   display: block;
   min-height: 100%;
 }
 
-/* If there's a main element in your tree, make it a scrollable area if desired.
-   This is optional but helpful if later you switch to a full-height flex layout. */
 main {
   flex: 1 1 auto;
-  /* allow inner scrolling if structure supports it */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: env(safe-area-inset-bottom, 12px);
 }
 
-/* safe bottom padding so native nav in WebView doesn't overlap content */
 body {
   padding-bottom: env(safe-area-inset-bottom, 12px);
 }
 
-/* footer safety — if you have a footer keep it visible */
 footer {
   flex-shrink: 0;
   padding-bottom: env(safe-area-inset-bottom, 12px);
 }
 
-/* small tweak for tiny screens so the gradient ring isn't too thick */
 @media (max-width: 420px) {
   .animate-gradient { padding: 2px; }
+}
+
+/* ===== Fix: prevent icon button from compressing when keyboard opens in WebView ===== */
+
+.bg-white.flex.items-center.rounded-full {
+  position: relative;
+  align-items: center;
+  gap: 12px;
+}
+
+.bg-white.flex.items-center.rounded-full input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-right: 64px; /* room for circular button */
+  box-sizing: border-box;
+}
+
+.bg-white.flex.items-center.rounded-full button[type="submit"] {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  flex: 0 0 auto;
+  min-width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 420px) {
+  .bg-white.flex.items-center.rounded-full input {
+    padding-right: 54px;
+  }
+  .bg-white.flex.items-center.rounded-full button[type="submit"] {
+    right: 6px;
+    min-width: 40px;
+    height: 40px;
+  }
+}
+
+.bg-white.flex.items-center.rounded-full {
+  overflow: visible;
 }
