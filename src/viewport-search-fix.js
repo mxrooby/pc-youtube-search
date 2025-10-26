@@ -1,3 +1,7 @@
+// src/viewport-search-fix.js
+// Lightweight safety: if the input's right padding is too small for the visible button,
+// increase padding-right (with !important) so text won't collide with the magnifier button.
+
 (function setupSearchViewportFix() {
     try {
       const capsuleSelector = '.bg-white.flex.items-center.rounded-full';
@@ -5,7 +9,6 @@
       function waitForCapsule(cb) {
         const capsule = document.querySelector(capsuleSelector);
         if (capsule) return cb(capsule);
-  
         const obs = new MutationObserver(() => {
           const c = document.querySelector(capsuleSelector);
           if (c) {
@@ -21,22 +24,11 @@
         const btn = capsule.querySelector('button[type="submit"]');
         if (!input || !btn) return;
   
-        // ensure button can't shrink via flexbox; also ensure fixed size
-        btn.style.boxSizing = 'border-box';
-        btn.style.flex = '0 0 auto';
-        btn.style.minWidth = '44px';
-        btn.style.width = '44px';
-        btn.style.height = '44px';
-        btn.style.display = 'inline-flex';
-        btn.style.alignItems = 'center';
-        btn.style.justifyContent = 'center';
-  
-        // small helper to set padding-right with !important
+        // set padding-right using !important where supported
         function setPaddingImportant(el, value) {
           try {
             el.style.setProperty('padding-right', value, 'important');
           } catch (e) {
-            // fallback
             el.style.paddingRight = value;
           }
         }
@@ -45,59 +37,51 @@
           try {
             const btnRect = btn.getBoundingClientRect();
             if (!btnRect.width) return;
-            const buffer = 18; // spacing between input text and button
-            const desired = Math.round(btnRect.width + buffer);
-            const pad = Math.max(desired, 54); // enforce minimum
-            const padVal = pad + 'px';
-            // only update if different
-            if ((input.style.getPropertyValue('padding-right') || '') !== padVal) {
-              setPaddingImportant(input, padVal);
+            const rightEdgeGap = 12; // matches CSS right offset
+            const buffer = 18;       // extra buffer for text breathing room
+            const desired = Math.round(btnRect.width + rightEdgeGap + buffer);
+            const minDefault = parseInt(window.getComputedStyle(input).getPropertyValue('padding-right')) || 0;
+  
+            // Only increase if desired is bigger than current computed padding (so we don't reduce)
+            const currentComputed = Math.round(parseFloat(window.getComputedStyle(input).getPropertyValue('padding-right')) || 0);
+            if (desired > currentComputed) {
+              setPaddingImportant(input, desired + 'px');
             }
           } catch (err) {
             // silent
           }
         }
   
-        // initial and delayed updates
+        // initial run + a few delayed runs (handle slow WebView reflows)
         updatePadding();
-        setTimeout(updatePadding, 80);
-        setTimeout(updatePadding, 250);
-        setTimeout(updatePadding, 700);
+        setTimeout(updatePadding, 120);
+        setTimeout(updatePadding, 400);
+        setTimeout(updatePadding, 900);
   
-        // strong repeated check while input has focus (handles WebView keyboard reflow)
-        let focusInterval = null;
+        // while user typing (keyboard open) occasionally re-check
+        let interval = null;
         input.addEventListener('focus', () => {
           updatePadding();
-          if (focusInterval) clearInterval(focusInterval);
-          focusInterval = setInterval(updatePadding, 300); // update every 300ms while typing
+          if (interval) clearInterval(interval);
+          interval = setInterval(updatePadding, 350);
         });
         input.addEventListener('blur', () => {
-          if (focusInterval) {
-            clearInterval(focusInterval);
-            focusInterval = null;
+          if (interval) {
+            clearInterval(interval);
+            interval = null;
           }
-          // final correction after blur
-          setTimeout(updatePadding, 120);
+          setTimeout(updatePadding, 200);
         });
   
-        // listen to window changes too
+        // also on resize/orientation change
         window.addEventListener('resize', updatePadding, { passive: true });
         window.addEventListener('orientationchange', updatePadding, { passive: true });
   
-        // also update on visualViewport changes if available
-        if (window.visualViewport) {
-          window.visualViewport.addEventListener('resize', updatePadding, { passive: true });
-          window.visualViewport.addEventListener('scroll', updatePadding, { passive: true });
-        }
-  
-        // MutationObserver in case layout or styles change
+        // keep an eye on layout changes
         const mo = new MutationObserver(updatePadding);
         mo.observe(capsule, { childList: true, subtree: true, attributes: true });
-  
-        // debug (will appear in console if accessible)
-        try { console.log('[viewport-search-fix] active'); } catch (e) {}
       });
     } catch (err) {
-      try { console.warn('[viewport-search-fix] failed', err); } catch (e) {}
+      // silent
     }
   })();  

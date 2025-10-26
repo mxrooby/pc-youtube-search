@@ -61,45 +61,59 @@
   min-width: 0;
 }
 
-/* enforce that the search button has fixed size and stays absolute */
+/* ---------- SEARCH CAPSULE (RESTORED LARGER SIZE + safe right spacing) ---------- */
+
 .bg-white.flex.items-center.rounded-full {
-  position: relative; /* containing block for absolute/positioned button */
+  position: relative;         /* allow absolutely positioned button */
+  min-height: 56px;           /* bigger capsule so it doesn't look cramped */
+  gap: 12px;
+  padding-left: 14px;
+  padding-right: 14px;        /* base padding; input will reserve extra via padding-right */
+  box-sizing: border-box;
 }
 
-/* make sure the input reserves space (minimum) and transitions smoothly */
+/* Input: reserve a large right padding so the button never overlaps text.
+   JS will only adjust this further if needed. */
 .bg-white.flex.items-center.rounded-full input {
-  transition: padding-right 0.22s ease;
-  /* leave any existing padding-top/padding-bottom alone */
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  line-height: 1.2;
   box-sizing: border-box;
   min-width: 0;
-  /* Keep a safe default but JS will overwrite with important */
-  padding-right: 64px;
+  /* Reserve space: button(52px) + right gap(12px) + safety buffer(20px) => ~84px */
+  padding-right: 84px;
+  transition: padding-right 0.22s ease;
 }
 
-/* style the button strongly so it never shrinks */
+/* Button: absolutely placed to the right, fixed size, will NOT shrink */
 .bg-white.flex.items-center.rounded-full button[type="submit"] {
   position: absolute;
-  right: 8px;
+  right: 12px;                 /* small right offset from capsule edge */
   top: 50%;
   transform: translateY(-50%);
   z-index: 20;
-  flex: 0 0 auto !important;
-  width: 44px !important;
-  height: 44px !important;
-  min-width: 44px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-sizing: border-box !important;
+
+  width: 52px;                 /* fixed size, adjust if you want larger */
+  height: 52px;
+  min-width: 52px;
+  border-radius: 9999px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* preserve look: white-on-blue circle used earlier */
+  padding: 0;
 }
 
-/* small screens: slightly smaller fixed button but still non-shrinking */
+/* Slightly smaller on narrow screens but still roomy */
 @media (max-width: 420px) {
-  .bg-white.flex.items-center.rounded-full input { padding-right: 58px; }
+  .bg-white.flex.items-center.rounded-full { min-height: 50px; padding-left: 12px; padding-right: 12px; }
+  .bg-white.flex.items-center.rounded-full input { padding-right: 72px; } /* 40px button + buffer */
   .bg-white.flex.items-center.rounded-full button[type="submit"] {
-    right: 6px;
-    width: 40px !important;
-    height: 40px !important;
-    min-width: 40px !important;
+    right: 10px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
   }
 }
