@@ -61,192 +61,45 @@
   min-width: 0;
 }
 
-/* Target the inner white capsule reliably and give good default height/spacing */
+/* enforce that the search button has fixed size and stays absolute */
 .bg-white.flex.items-center.rounded-full {
-  min-height: 52px;
-  gap: 12px;
-  padding-left: 12px;
-  padding-right: 10px;
+  position: relative; /* containing block for absolute/positioned button */
 }
 
-/* Ensure the input text vertically centers nicely */
+/* make sure the input reserves space (minimum) and transitions smoothly */
 .bg-white.flex.items-center.rounded-full input {
-  padding-top: 0.4rem;
-  padding-bottom: 0.4rem;
-  line-height: 1.2;
-}
-
-/* Style the icon-only button inside the capsule */
-.bg-white.flex.items-center.rounded-full button[type="submit"] {
-  padding: 0.45rem;
-  border-radius: 9999px;
-  min-width: 40px;
-  height: auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Give the icon some breathing room */
-.bg-white.flex.items-center.rounded-full button[type="submit"] svg {
-  display: block;
-}
-
-/* small shadow / hover (subtle) */
-.bg-white.flex.items-center.rounded-full button[type="submit"]:hover {
-  box-shadow: 0 6px 18px rgba(14, 165, 233, 0.12);
-}
-
-/* touch-friendly sizes on mobile */
-@media (max-width: 640px) {
-  .bg-white.flex.items-center.rounded-full {
-    min-height: 48px;
-    padding-left: 10px;
-    padding-right: 8px;
-    gap: 10px;
-  }
-  .bg-white.flex.items-center.rounded-full input {
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
-  .bg-white.flex.items-center.rounded-full button[type="submit"] {
-    padding: 0.45rem;
-    min-width: 36px;
-  }
-}
-
-/* tiny screen: <= 320px */
-@media (max-width: 320px) {
-  .bg-white.flex.items-center.rounded-full {
-    min-height: 44px;
-    padding-left: 8px;
-    padding-right: 6px;
-    gap: 8px;
-  }
-  .bg-white.flex.items-center.rounded-full input {
-    padding-left: 6px;
-    padding-right: 6px;
-  }
-  .bg-white.flex.items-center.rounded-full button[type="submit"] {
-    padding: 0.35rem;
-    min-width: 34px;
-  }
-  .btn-text { display: none !important; }
-}
-
-/* keep text visible for screens wider than 320px */
-@media (min-width: 321px) {
-  .btn-text { display: inline; }
-}
-
-/* -------------------------
-   Video embed (kept)
-   -------------------------*/
-
-.video-embed {
-  position: relative;
-  width: 100%;
-  padding-top: 56.25%;
-  overflow: hidden;
-  background: #000;
-  border-radius: 8px;
-}
-
-.video-embed iframe,
-.video-embed video,
-.video-embed .player {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Optional tweak for small screens */
-@media (max-width: 420px) {
-  .animate-gradient { padding: 2px; }
-}
-
-/* ======== MOBILE SAFE VIEW (safe, non-invasive) ======== */
-
-html, body, #root {
-  height: 100%;
-  min-height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-#root > div {
-  display: block;
-  min-height: 100%;
-}
-
-main {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: env(safe-area-inset-bottom, 12px);
-}
-
-body {
-  padding-bottom: env(safe-area-inset-bottom, 12px);
-}
-
-footer {
-  flex-shrink: 0;
-  padding-bottom: env(safe-area-inset-bottom, 12px);
-}
-
-@media (max-width: 420px) {
-  .animate-gradient { padding: 2px; }
-}
-
-/* ===== Fix: prevent icon button from compressing when keyboard opens in WebView ===== */
-
-.bg-white.flex.items-center.rounded-full {
-  position: relative;
-  align-items: center;
-  gap: 12px;
-}
-
-.bg-white.flex.items-center.rounded-full input {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding-right: 64px; /* room for circular button */
+  transition: padding-right 0.22s ease;
+  /* leave any existing padding-top/padding-bottom alone */
   box-sizing: border-box;
+  min-width: 0;
+  /* Keep a safe default but JS will overwrite with important */
+  padding-right: 64px;
 }
 
+/* style the button strongly so it never shrinks */
 .bg-white.flex.items-center.rounded-full button[type="submit"] {
   position: absolute;
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 10;
-  flex: 0 0 auto;
-  min-width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  z-index: 20;
+  flex: 0 0 auto !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
 }
 
+/* small screens: slightly smaller fixed button but still non-shrinking */
 @media (max-width: 420px) {
-  .bg-white.flex.items-center.rounded-full input {
-    padding-right: 54px;
-  }
+  .bg-white.flex.items-center.rounded-full input { padding-right: 58px; }
   .bg-white.flex.items-center.rounded-full button[type="submit"] {
     right: 6px;
-    min-width: 40px;
-    height: 40px;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
   }
-}
-
-.bg-white.flex.items-center.rounded-full {
-  overflow: visible;
 }
