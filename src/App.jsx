@@ -229,13 +229,18 @@ export default function App() {
             <iframe
               className="absolute top-0 left-0 w-full h-full border-0"
               title="YouTube player"
-              src={`https://www.youtube.com/embed/${playerId}`}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              // add playsinline, enablejsapi, modestbranding, rel=0 (no related vids),
+              // and origin so YouTube knows the embed's origin (helps some browsers)
+              src={`https://www.youtube.com/embed/${playerId}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1&controls=1&origin=${encodeURIComponent(window.location.origin)}`}
+              // allow the features the player needs (including fullscreen)
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
               allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
         </div>
       )}
+
 
       {/* Grid */}
       <section className="mt-6">
